@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html ng-app="TheOffice">
+<head>
+  <meta charset="utf-8">
+  <title>The Office Simulation</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Pixel‑font -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body ng-controller="OfficeController as vm">
+  <!-- HEADER BAR -->
+  <header id="app-header">
+    <h1>The Office</h1>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <div id="app-container">
+    <!-- 1) GAME AREA -->
+    <div id="game-container"></div>
+
+    <!-- 2) CHAT PANEL -->
+    <section id="chat-panel" ng-controller="ChatController as chat">
+      <h2>Chat</h2>
+      <div id="messages">
+        <div ng-repeat="msg in chat.messages" class="message {{msg.from}}">
+          <strong>{{msg.from}}:</strong> {{msg.text}}
+        </div>
+      </div>
+      <form ng-submit="chat.send()">
+        <input type="text" ng-model="chat.input" placeholder="Type a message…" required autofocus>
+        <button type="submit">Send</button>
+      </form>
+    </section>
+
+    <!-- 3) AGENTS SIDEBAR -->
+    <aside id="sidebar">
+      <h2>Agents</h2>
+      <select id="roleFilter" multiple
+              ng-model="vm.selectedRoles"
+              ng-change="vm.onRoleSelect()"
+              ng-options="r for r in vm.roles"
+              size="3"
+              style="width:100%; margin-bottom:1em;">
+      </select>
+      <ul>
+        <li ng-repeat="agent in vm.agents"
+            ng-if="vm.selectedRoles.indexOf(agent.name) !== -1">
+          {{agent.name}}<span ng-if="agent.task"> – {{agent.task}}</span>
+        </li>
+      </ul>
+
+      <div id="taskPanel" ng-show="vm.selectedAgent">
+        <h3>Assign to {{vm.selectedAgent.name}}</h3>
+        <ul>
+          <li ng-repeat="task in vm.tasks">
+            <button ng-click="vm.assign(vm.selectedAgent, task)">{{task}}</button>
+          </li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="js/app.js"></script>
+  <script src="js/controller.js"></script>
+  <script src="js/game.js"></script>
+
+  <!-- ChatController for the chatbot panel -->
+  <script>
+    angular.module('TheOffice')
+      .controller('ChatController', function($timeout) {
+        const chat = this;
+        chat.messages = [
+          { from: 'System', text: 'Welcome to The Office Chat!' }
+        ];
+        chat.input = '';
+
+        chat.send = function() {
+          if (!chat.input) return;
+          chat.messages.push({ from: 'You', text: chat.input });
+          // Dummy bot reply after a short delay
+          $timeout(() => {
+            chat.messages.push({ from: 'Bot', text: 'You said: ' + chat.input });
+          }, 500);
+          chat.input = '';
+        };
+      });
+  </script>
+</body>
+</html>

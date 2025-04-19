@@ -1,0 +1,157 @@
+/* Apply pixel font and reset */
+body, h1, h2, h3, ul, li {
+  margin: 0; padding: 0;
+  font-family: 'Press Start 2P', cursive;
+  color: #fff;
+}
+html, body {
+  height: 100%;
+}
+
+/* Header */
+#app-header {
+  background: black;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 2px solid #555;
+}
+#app-header h1 {
+  font-size: 18px;
+}
+
+/* Main flex layout */
+#app-container {
+  display: flex;
+  height: calc(100vh - 50px); /* full height minus header */
+  align-items: stretch;
+}
+
+/* Game area */
+#game-container {
+  flex: none;
+  width: 572px;     /* match Phaser config width */
+  height: 100%;
+  background: #000;   /* fallback if canvas smaller */
+}
+
+/* 2) Chat panel flex fill */
+#chat-panel {
+  flex: 1;
+  background: #161616;
+  border-left: 2px solid #444;
+  border-right: 2px solid #444;
+  color: #ddd;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  overflow: hidden;
+}
+#chat-panel h2 {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+.message {
+  margin-bottom: 6px;
+}
+.message.You { text-align: right; color: #8cf; }
+.message.Bot { text-align: left; color: #fc8; }
+#chat-panel form {
+  display: flex;
+  margin-top: auto;
+}
+#chat-panel input {
+  flex: 1;
+  padding: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  border: 1px solid #555;
+  background: #222;
+  color: #fff;
+}
+#chat-panel button {
+  margin-left: 6px;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 12px;
+  border: 1px solid #555;
+  background: #333;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Sidebar */
+#sidebar {
+  flex: none;
+  width: 175px;
+  display: flex;
+  flex-direction: column;
+  background: black;
+  border-left: 2px solid #54fe25;
+  padding: 20px;
+  overflow-y: auto;
+  color: #fff;                    /* white text */
+  font-family: 'Press Start 2P', monospace;
+
+}
+#sidebar h2 {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+#sidebar label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+#sidebar select {
+  width: 100%;
+  height: auto;
+  min-height: 80px;
+  background: #000;
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  border: 2px solid #54fe25;
+  padding: 6px;
+  margin-bottom: 16px;
+}
+
+/* Agent list */
+#sidebar ul {
+  list-style: none;
+  margin-bottom: 16px;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+#sidebar ul li {
+  font-size: 14px;
+  padding: 6px;
+  border-bottom: 1px solid #54fe25;
+}
+
+/* Task panel */
+#taskPanel h3 {
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+#taskPanel button {
+  display: block;
+  width: 100%;
+  font-size: 12px;
+  font-family: inherit;
+  background: #000;
+  color: #fff;
+  border: 2px solid #54fe25;
+  padding: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+
