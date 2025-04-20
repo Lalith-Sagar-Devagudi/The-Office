@@ -1,2 +1,3 @@
 # The Office
-The AI Office
+
+![alt text](images/initial.png)
