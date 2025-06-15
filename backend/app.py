@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from auth import auth_router
 from chat import chat_router
 
 # Initialize FastAPI app
@@ -18,7 +17,6 @@ app.add_middleware(
 )
 
 # Register routers
-app.include_router(auth_router)
 app.include_router(chat_router)
 
 # To run: uvicorn backend.app:app --reload --port 8001

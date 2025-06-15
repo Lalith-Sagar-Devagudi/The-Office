@@ -15,6 +15,11 @@ uvicorn = "^0.34.2"
 fastapi = "^0.115.12"
 python-multipart = "^0.0.20"
 pyjwt = "^2.10.1"
+llama-index-core = "^0.12.41"
+langgraph = "^0.4.8"
+openai = "^1.86.0"
+serpapi = "^0.1.5"
+langchain-core = "^0.3.65"
 
 
 [tool.poetry.group.dev.dependencies]

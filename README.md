@@ -1,3 +1,3 @@
 # The Office
 
-![alt text](images/initial.png)
+![alt text](images/theofficealpha.png)
