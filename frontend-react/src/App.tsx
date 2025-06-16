@@ -73,21 +73,23 @@ function App() {
         onSelectCharacter={handleCharacterSelect}
       />
 
-      {mapData && spriteSheet && characterSheet && (
-        <OfficeCanvas
-          mapData={mapData}
-          spriteSheet={spriteSheet}
-          characterSheet={characterSheet}
-          gameState={gameState}
-          onCharacterSelect={handleCharacterSelect}
-          onAddChatMessage={handleAddChatMessage}
-        />
-      )}
+      <div className="main-content">
+        {mapData && spriteSheet && characterSheet && (
+          <OfficeCanvas
+            mapData={mapData}
+            spriteSheet={spriteSheet}
+            characterSheet={characterSheet}
+            gameState={gameState}
+            onCharacterSelect={handleCharacterSelect}
+            onAddChatMessage={handleAddChatMessage}
+          />
+        )}
 
-      <Chat
-        messages={messages}
-        onSendMessage={sendMessage}
-      />
+        <Chat
+          messages={messages}
+          onSendMessage={sendMessage}
+        />
+      </div>
     </div>
   );
 }

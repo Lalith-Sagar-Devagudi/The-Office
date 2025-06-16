@@ -16,6 +16,24 @@ body {
   margin: 0 auto;
 }
 
+.main-content {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+.main-content .canvas-container {
+  margin: 0;
+  margin-right: 50px;
+}
+
+.main-content .info {
+  margin-top: 0;
+  flex-shrink: 0;
+  width: 500px;
+}
+
 .header {
   text-align: center;
   margin-bottom: 20px;
@@ -156,7 +174,7 @@ button.active {
   background-color: #1a1a1a;
   padding: 20px;
   border-radius: 8px;
-  overflow: auto;
+  overflow: hidden;
   position: relative;
 }
 
@@ -203,7 +221,8 @@ canvas {
 
 /* Chat Interface Styles */
 .chat-container {
-  height: 300px;
+  width: 500px;
+  height: 680px;
   display: flex;
   flex-direction: column;
 }
