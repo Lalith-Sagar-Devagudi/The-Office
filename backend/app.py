@@ -6,8 +6,15 @@ from chat import chat_router
 # Initialize FastAPI app
 app = FastAPI()
 
-# CORS configuration for frontend
-origins = ["http://localhost:8000"]
+# CORS configuration for frontend (includes Docker container networking)
+origins = [
+    "http://localhost:3000",  # React dev server
+    "http://localhost:8000",  # Original frontend
+    "http://localhost:80",    # Docker nginx
+    "http://localhost",       # Docker nginx without port
+    "http://frontend",        # Docker container name
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

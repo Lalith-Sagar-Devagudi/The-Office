@@ -1,0 +1,51 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: the-office-backend-dev
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend:/app
+      - /app/__pycache__
+      - /app/.venv
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+    networks:
+      - office-network
+    command: [ "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8001", "--reload", "--reload-dir", "/app" ]
+
+  frontend:
+    build:
+      context: ./frontend-react
+      dockerfile: Dockerfile.dev
+    container_name: the-office-frontend-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend-react:/app
+      - /app/node_modules
+      - /app/build
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - office-network
+    stdin_open: true
+    tty: true
+
+networks:
+  office-network:
+    driver: bridge
+
+volumes:
+  backend_data:
+  frontend_node_modules:

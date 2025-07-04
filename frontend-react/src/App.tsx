@@ -16,7 +16,7 @@ function App() {
     toggleBoundaries,
     selectCharacter
   } = useGameState();
-  const { messages, sendMessage, addAgentMessage } = useChat();
+  const { messages, sendMessage, addAgentMessage, isLoading } = useChat();
 
   if (loading) {
     return (
@@ -88,6 +88,8 @@ function App() {
         <Chat
           messages={messages}
           onSendMessage={sendMessage}
+          selectedAgent={gameState.selectedCharacter}
+          isLoading={isLoading}
         />
       </div>
     </div>

@@ -3,10 +3,17 @@ import { ChatMessage } from '../types';
 
 interface ChatProps {
     messages: ChatMessage[];
-    onSendMessage: (message: string) => void;
+    onSendMessage: (message: string, selectedAgent?: string | null) => void;
+    selectedAgent?: string | null;
+    isLoading?: boolean;
 }
 
-export const Chat: React.FC<ChatProps> = ({ messages, onSendMessage }) => {
+export const Chat: React.FC<ChatProps> = ({
+    messages,
+    onSendMessage,
+    selectedAgent,
+    isLoading
+}) => {
     const [inputValue, setInputValue] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -17,14 +24,14 @@ export const Chat: React.FC<ChatProps> = ({ messages, onSendMessage }) => {
     }, [messages]);
 
     const handleSendMessage = () => {
-        if (inputValue.trim()) {
-            onSendMessage(inputValue);
+        if (inputValue.trim() && !isLoading) {
+            onSendMessage(inputValue, selectedAgent);
             setInputValue('');
         }
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && !isLoading) {
             handleSendMessage();
         }
     };
@@ -45,6 +52,17 @@ export const Chat: React.FC<ChatProps> = ({ messages, onSendMessage }) => {
     return (
         <div className="info">
             <h3>💬 Office Chat</h3>
+            <div className="chat-agent-status">
+                {selectedAgent ? (
+                    <span className="agent-selected">
+                        🎯 Selected Agent: <strong>{selectedAgent}</strong>
+                    </span>
+                ) : (
+                    <span className="agent-none">
+                        🤖 Supreme Agent Mode (no specific agent selected)
+                    </span>
+                )}
+            </div>
             <div className="chat-container">
                 <div className="chat-messages">
                     {messages.map((message, index) => (
@@ -52,6 +70,13 @@ export const Chat: React.FC<ChatProps> = ({ messages, onSendMessage }) => {
                             {message.timestamp} {getMessagePrefix(message)}: {message.message}
                         </div>
                     ))}
+                    {isLoading && (
+                        <div className="chat-message system">
+                            <span className="loading-indicator">
+                                {new Date().toLocaleTimeString()} [SYSTEM]: Agent is thinking...
+                            </span>
+                        </div>
+                    )}
                     <div ref={messagesEndRef} />
                 </div>
                 <div className="chat-input-container">
@@ -59,18 +84,23 @@ export const Chat: React.FC<ChatProps> = ({ messages, onSendMessage }) => {
                         ref={inputRef}
                         type="text"
                         className="chat-input"
-                        placeholder="Type your message..."
+                        placeholder={
+                            selectedAgent
+                                ? `Ask ${selectedAgent} a question...`
+                                : "Ask a question (Supreme Agent will route)..."
+                        }
                         maxLength={200}
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyPress={handleKeyPress}
+                        disabled={isLoading}
                     />
                     <button
                         className="chat-send-btn"
                         onClick={handleSendMessage}
-                        disabled={!inputValue.trim()}
+                        disabled={!inputValue.trim() || isLoading}
                     >
-                        Send
+                        {isLoading ? 'Sending...' : 'Send'}
                     </button>
                 </div>
             </div>

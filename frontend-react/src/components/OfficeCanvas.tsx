@@ -27,70 +27,71 @@ export const OfficeCanvas: React.FC<OfficeCanvasProps> = ({
     const animationFrameRef = useRef<number | undefined>(undefined);
     const lastProcessedSelection = useRef<string | null>(null);
 
-    // Speech bubble state
+    // Speech bubble state - now tracks which character has active speech bubble
     const [speechBubble, setSpeechBubble] = useState<{
         visible: boolean;
         message: string;
         x: number;
         y: number;
+        characterRole: string | null; // Track which character owns this speech bubble
     }>({
         visible: false,
         message: '',
         x: 0,
-        y: 0
+        y: 0,
+        characterRole: null
     });
+
+    // Function to calculate speech bubble position based on character position
+    const calculateSpeechBubblePosition = useCallback((character: OfficeCharacter): { x: number; y: number } => {
+        if (!mapData || !canvasRef.current) return { x: 0, y: 0 };
+
+        const canvas = canvasRef.current;
+        const container = canvas.parentElement;
+
+        if (!container) return { x: 0, y: 0 };
+
+        // Calculate character position on canvas (in pixels)
+        const characterScreenX = character.x * mapData.tileSize * gameState.zoom;
+        const characterScreenY = character.y * mapData.tileSize * gameState.zoom;
+
+        // Get canvas position within its container
+        const containerRect = container.getBoundingClientRect();
+        const canvasRect = canvas.getBoundingClientRect();
+
+        // Calculate offset of canvas within container
+        const canvasOffsetX = canvasRect.left - containerRect.left;
+        const canvasOffsetY = canvasRect.top - containerRect.top;
+
+        // Calculate speech bubble position
+        const bubbleX = characterScreenX + canvasOffsetX;
+        const bubbleY = characterScreenY + canvasOffsetY;
+
+        return { x: bubbleX, y: bubbleY };
+    }, [mapData, gameState.zoom]);
 
     const showSpeechBubble = useCallback((character: OfficeCharacter, message: string) => {
         console.log('Showing speech bubble for:', character.role, 'at character position:', character.x, character.y);
 
-        if (mapData && canvasRef.current) {
-            const canvas = canvasRef.current;
-            const container = canvas.parentElement;
+        const position = calculateSpeechBubblePosition(character);
 
-            if (container) {
-                // Calculate character position on canvas (in pixels)
-                const characterScreenX = character.x * mapData.tileSize * gameState.zoom;
-                const characterScreenY = character.y * mapData.tileSize * gameState.zoom;
+        // Update speech bubble state
+        setSpeechBubble({
+            visible: true,
+            message: message,
+            x: position.x,
+            y: position.y,
+            characterRole: character.role
+        });
 
-                // Get canvas position within its container
-                // The container has 20px padding and centers the canvas
-                const containerRect = container.getBoundingClientRect();
-                const canvasRect = canvas.getBoundingClientRect();
-
-                // Calculate offset of canvas within container
-                const canvasOffsetX = canvasRect.left - containerRect.left;
-                const canvasOffsetY = canvasRect.top - containerRect.top;
-
-                // Adjust speech bubble position to account for canvas offset
-                const bubbleX = characterScreenX + canvasOffsetX;
-                const bubbleY = characterScreenY + canvasOffsetY;
-
-                console.log('Character world position:', character.x, character.y);
-                console.log('Character screen position on canvas:', characterScreenX, characterScreenY);
-                console.log('Canvas offset within container:', canvasOffsetX, canvasOffsetY);
-                console.log('Final speech bubble position:', bubbleX, bubbleY);
-
-                // Update speech bubble state
-                setSpeechBubble({
-                    visible: true,
-                    message: message,
-                    x: bubbleX,
-                    y: bubbleY
-                });
-
-                console.log('Speech bubble state updated successfully');
-            } else {
-                console.log('Canvas container not found');
-            }
-        } else {
-            console.log('MapData or canvas not available for speech bubble');
-        }
-    }, [mapData, gameState.zoom]);
+        console.log('Speech bubble state updated successfully');
+    }, [calculateSpeechBubblePosition]);
 
     const hideSpeechBubble = useCallback(() => {
         setSpeechBubble(prev => ({
             ...prev,
-            visible: false
+            visible: false,
+            characterRole: null
         }));
     }, []);
 
@@ -170,7 +171,6 @@ export const OfficeCanvas: React.FC<OfficeCanvasProps> = ({
         if (!mapData || !spriteSheet || !characterSheet || characters.length === 0) return;
 
         const gameLoop = (currentTime: number) => {
-            const deltaTime = currentTime - lastTimeRef.current;
             lastTimeRef.current = currentTime;
 
             // Update characters
@@ -180,6 +180,19 @@ export const OfficeCanvas: React.FC<OfficeCanvasProps> = ({
                     character.update(now, gameState.characterSpeed);
                 }
             });
+
+            // Update speech bubble position if there's an active speech bubble
+            if (speechBubble.visible && speechBubble.characterRole) {
+                const activeCharacter = characters.find(char => char.role === speechBubble.characterRole);
+                if (activeCharacter) {
+                    const newPosition = calculateSpeechBubblePosition(activeCharacter);
+                    setSpeechBubble(prev => ({
+                        ...prev,
+                        x: newPosition.x,
+                        y: newPosition.y
+                    }));
+                }
+            }
 
             // Render everything
             const canvas = canvasRef.current;
@@ -295,7 +308,7 @@ export const OfficeCanvas: React.FC<OfficeCanvasProps> = ({
                 cancelAnimationFrame(animationFrameRef.current);
             }
         };
-    }, [mapData, spriteSheet, characterSheet, characters, gameState]);
+    }, [mapData, spriteSheet, characterSheet, characters, gameState, speechBubble.visible, speechBubble.characterRole, calculateSpeechBubblePosition]);
 
     return (
         <div className="canvas-container" style={{ position: 'relative' }}>

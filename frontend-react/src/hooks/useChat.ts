@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { ChatMessage } from '../types';
-import { CHAT_RESPONSES } from '../constants';
 
 export const useChat = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([
@@ -11,10 +10,12 @@ export const useChat = () => {
         },
         {
             type: 'system',
-            message: 'Select an agent above to interact with them',
+            message: 'Select an agent above to chat directly, or chat without selecting for Supreme Agent routing',
             timestamp: new Date().toLocaleTimeString()
         }
     ]);
+
+    const [isLoading, setIsLoading] = useState(false);
 
     const addMessage = useCallback((type: ChatMessage['type'], message: string, sender?: string) => {
         const newMessage: ChatMessage = {
@@ -27,20 +28,59 @@ export const useChat = () => {
         setMessages(prev => [...prev, newMessage]);
     }, []);
 
-    const sendMessage = useCallback((message: string) => {
+    const sendMessage = useCallback(async (message: string, selectedAgent?: string | null) => {
         if (message.trim() === '') return;
 
         // Add user message
         addMessage('user', message);
+        setIsLoading(true);
 
-        // Generate agent response after a random delay
-        setTimeout(() => {
-            const agents = ['CEO', 'DEVELOPER', 'HR', 'MANAGER'];
-            const randomAgent = agents[Math.floor(Math.random() * agents.length)];
-            const randomResponse = CHAT_RESPONSES[Math.floor(Math.random() * CHAT_RESPONSES.length)];
+        try {
+            // Smart API URL detection for different environments
+            const getApiUrl = () => {
+                // In Docker development mode, backend runs on same network
+                if (window.location.hostname === 'localhost' && window.location.port === '3000') {
+                    return 'http://localhost:8001/chat'; // Development mode
+                }
+                // In production Docker setup with nginx proxy
+                else if (process.env.NODE_ENV === 'production') {
+                    return '/api/chat'; // Production mode with nginx proxy
+                }
+                // Fallback for local development
+                else {
+                    return 'http://localhost:8001/chat';
+                }
+            };
 
-            addMessage('agent', randomResponse, randomAgent);
-        }, 500 + Math.random() * 1000);
+            const apiUrl = getApiUrl();
+
+            // Make API call to backend
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    agent: selectedAgent || undefined
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Add agent response
+            addMessage('agent', data.response, data.agent_used || 'Unknown');
+
+        } catch (error) {
+            console.error('Error sending message:', error);
+            addMessage('system', `Error: Failed to send message. Please try again.`);
+        } finally {
+            setIsLoading(false);
+        }
     }, [addMessage]);
 
     const addAgentMessage = useCallback((sender: string, message: string) => {
@@ -61,6 +101,7 @@ export const useChat = () => {
         messages,
         sendMessage,
         addAgentMessage,
-        clearChat
+        clearChat,
+        isLoading
     };
 }; 
